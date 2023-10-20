@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'drf_yasg',
 
     'user',
-    'command',
+    'team',
 
     'common',
 ]

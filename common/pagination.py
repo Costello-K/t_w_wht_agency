@@ -1,3 +1,4 @@
+from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
@@ -40,3 +41,34 @@ class SettingsPageNumberPagination(PageNumberPagination):
                 'previous': self.get_previous_link(),
             }
         })
+
+
+def get_serializer_paginate(instance, queryset, serializer):
+    """
+    Paginate and serialize a queryset based on the provided serializer.
+
+    This function is used to paginate a queryset and serialize the results using a specified serializer. It checks if
+    pagination is needed and returns the appropriate response.
+
+    Args:
+        instance (object): The view instance where the method is called.
+        queryset (QuerySet): The queryset containing the data to be serialized.
+        serializer (Serializer): The serializer class used to serialize the data.
+
+    Returns:
+        Response: A response object containing the serialized data with pagination information if applicable.
+
+    Example Usage:
+    get_serializer_paginate(self, queryset, UserSerializer)
+    """
+    # check if pagination is required for the queryset
+    page = instance.paginate_queryset(queryset=queryset)
+
+    if page is not None:
+        # if pagination is needed, serialized and paginated data
+        serializer = serializer(page, many=True)
+        return instance.get_paginated_response(data=serializer.data)
+
+    # if pagination is not needed, serialized the entire queryset
+    serializer = serializer(queryset, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)

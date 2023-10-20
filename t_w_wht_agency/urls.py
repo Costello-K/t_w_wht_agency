@@ -8,7 +8,7 @@ urlpatterns = [
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
     path('v1/', include('user.urls')),
-    path('v1/', include('command.urls')),
+    path('v1/teams/', include('team.urls')),
 ]
 
 # Include URL patterns for API documentation
