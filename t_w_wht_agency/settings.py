@@ -140,6 +140,8 @@ STATICFILES_DIRS = (BASE_DIR/'static', )
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+DEFAULT_USER_AVATAR_URL = os.path.join(MEDIA_URL, 'default/images/users/avatar.png')
+USER_AVATAR_MAX_SIZE_MB = 2
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

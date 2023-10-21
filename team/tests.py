@@ -32,6 +32,8 @@ class TeamTests(TestCase):
         # create teams in the database
         self.team_1 = TeamFactory(leader=self.user_1, member=(self.user_2, self.user_3, self.user_4))
         self.team_2 = TeamFactory(leader=self.user_6, member=(self.user_1, self.user_3, self.user_5))
+        self.team_3 = TeamFactory(leader=self.user_1, member=(self.user_2, self.user_3, self.user_5))
+        self.team_4 = TeamFactory(leader=self.user_6, member=(self.user_1, ))
 
         # URL for accessing the API endpoint
         self.url_get_team_list = reverse('team-list')
@@ -59,7 +61,31 @@ class TeamTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue('results' in response.data)
         self.assertEqual(len(response.data['results']), Team.objects.all().count())
-        expected_users = [self.team_1.id, self.team_2.id]
+        expected_users = [self.team_1.id, self.team_2.id, self.team_3.id, self.team_4.id]
+        users_from_response = [team.get('id') for team in response.data['results']]
+        self.assertEqual(sorted(users_from_response), sorted(expected_users))
+
+    def test_list_team_leader(self):
+        self.client.force_authenticate(user=self.user_1)
+
+        response = self.client.get(reverse('user-team-leaders', args=[self.user_1.id]))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue('results' in response.data)
+        self.assertEqual(len(response.data['results']), Team.objects.filter(leader_id=self.user_1.id).count())
+        expected_users = [self.team_1.id, self.team_3.id]
+        users_from_response = [team.get('id') for team in response.data['results']]
+        self.assertEqual(sorted(users_from_response), sorted(expected_users))
+
+    def test_list_team_member(self):
+        self.client.force_authenticate(user=self.user_1)
+
+        response = self.client.get(reverse('user-team-members', args=[self.user_1.id]))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue('results' in response.data)
+        self.assertEqual(len(response.data['results']), Team.objects.filter(member=self.user_1).count())
+        expected_users = [self.team_2.id, self.team_4.id]
         users_from_response = [team.get('id') for team in response.data['results']]
         self.assertEqual(sorted(users_from_response), sorted(expected_users))
 

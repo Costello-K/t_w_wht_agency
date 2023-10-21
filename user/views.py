@@ -1,8 +1,13 @@
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
 from rest_framework import viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 
+from common.pagination import get_serializer_paginate
 from common.permissions import IsOwner
+from team.serializers import TeamSerializer
 from user.serializers import UserSerializer
 
 User = get_user_model()
@@ -37,7 +42,29 @@ class UserViewSet(viewsets.ModelViewSet):
 
         if self.action == 'create':
             permission_classes = [AllowAny]
-        elif self.action in ['update', 'partial_update', 'destroy']:
+        elif self.action in ['update', 'partial_update', 'destroy', 'requests']:
             permission_classes = [IsOwner]
+        elif self.action in ['teams_leader', 'teams_member']:
+            permission_classes = [IsAuthenticated]
 
         return [permission() for permission in permission_classes]
+
+    @action(detail=False, methods=['get'])
+    def teams_leader(self, request, pk=None):
+        """
+        Retrieve teams led by the user.
+        """
+        if not pk or pk != request.user.id:
+            raise NotFound({'message': _('Page not found.')})
+        queryset = request.user.my_teams_leader.order_by(*self.ordering)
+        return get_serializer_paginate(self, queryset, TeamSerializer)
+
+    @action(detail=False, methods=['get'])
+    def teams_member(self, request, pk=None):
+        """
+        Retrieve teams the user is a member of.
+        """
+        if not pk or pk != request.user.id:
+            raise NotFound({'message': _('Page not found.')})
+        queryset = request.user.my_teams_member.order_by(*self.ordering)
+        return get_serializer_paginate(self, queryset, TeamSerializer)

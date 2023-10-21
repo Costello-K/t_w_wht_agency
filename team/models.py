@@ -14,9 +14,9 @@ class Team(TimestampModel):
     Team class that extends the TimeStampedModel.
     This class represents a team model with additional timestamp fields.
     """
-    leader = models.ForeignKey(User, verbose_name=_('leader'), on_delete=models.CASCADE)
+    leader = models.ForeignKey(User, verbose_name=_('leader'), on_delete=models.CASCADE, related_name='teams_leader')
     # we accept that one member can be present in several teams
-    member = models.ManyToManyField(User, verbose_name=_('member'), related_name='teams')
+    member = models.ManyToManyField(User, verbose_name=_('member'), related_name='teams_member')
     name = models.CharField(_('name'), max_length=254, unique=True)
     description = models.TextField(_('description'), blank=True)
 
