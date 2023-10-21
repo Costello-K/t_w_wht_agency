@@ -22,8 +22,8 @@ class Migration(migrations.Migration):
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('name', models.CharField(max_length=254, unique=True, verbose_name='name')),
                 ('description', models.TextField(blank=True, verbose_name='description')),
-                ('leader', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='leader')),
-                ('member', models.ManyToManyField(related_name='teams', to=settings.AUTH_USER_MODEL, verbose_name='member')),
+                ('leader', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='teams_leader', to=settings.AUTH_USER_MODEL, verbose_name='leader')),
+                ('member', models.ManyToManyField(related_name='teams_member', to=settings.AUTH_USER_MODEL, verbose_name='member')),
             ],
             options={
                 'verbose_name': 'team',

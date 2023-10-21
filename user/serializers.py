@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
@@ -17,7 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'password', 'confirm_password')
+        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'avatar', 'password', 'confirm_password')
 
     def create(self, validated_data):
         """
@@ -49,3 +50,33 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data, password=password)
 
         return user
+
+    def update(self, instance, validated_data):
+        if self.context['request'].data.get('avatar') == '':
+            validated_data['avatar'] = None
+
+        return super().update(instance, validated_data)
+
+    def to_representation(self, instance):
+        # Initialize the data dictionary with the default representation
+        data = super().to_representation(instance)
+
+        # !!!there is no error here, all checks are necessary.
+        # instance.avatar checks whether the field is empty,
+        # otherwise hasattr(instance.avatar, 'file') will have an execution
+        if hasattr(instance, 'avatar') and instance.avatar and hasattr(instance.avatar, 'file'):
+            data['avatar'] = instance.avatar.url
+        else:
+            # if the image does not exist, we send the image for the user by default
+            data['avatar'] = settings.DEFAULT_USER_AVATAR_URL
+
+        return data
+
+    @staticmethod
+    def validate_avatar(value):
+        """
+        Validate the size of the avatar image.
+        """
+        if value and value.size > (settings.USER_AVATAR_MAX_SIZE_MB * 1024 * 1024):
+            raise serializers.ValidationError(f'Maximum image size allowed is {settings.USER_AVATAR_MAX_SIZE_MB} Mb')
+        return value

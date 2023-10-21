@@ -18,7 +18,7 @@ urlpatterns = [
     # http://{ALLOWED_HOSTS[0]}/auth/o/facebook/?redirect_uri=http://{ALLOWED_HOSTS[0]}/auth/o/facebook/
     path('auth/', include('djoser.social.urls')),
 
-    path('v1/', include('user.urls')),
+    path('v1/users/', include('user.urls')),
     path('v1/teams/', include('team.urls')),
 ]
 
