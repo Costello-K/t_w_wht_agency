@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: ${PSQL_HOST}
+    image: postgres:15.1
+    environment:
+      POSTGRES_DB: ${PSQL_DB}
+      POSTGRES_USER: ${PSQL_USER}
+      POSTGRES_PASSWORD: ${PSQL_PASSWORD}
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgsql_data:/var/lib/postgresql/data/
+    networks:
+      - wht_agency_network
+
+  backend:
+    container_name: wht_agency_backend
+    build: ./
+    volumes:
+      - .:/app
+    ports:
+      - '8000:8000'
+    depends_on:
+      - db
+    networks:
+      - wht_agency_network
+
+volumes:
+  pgsql_data:
+
+networks:
+  wht_agency_network:
+    name: wht_agency_network
+    driver: bridge
